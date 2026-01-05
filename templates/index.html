@@ -68,74 +68,213 @@
       /* Agent Node Styles */
       .agent-node {
         transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+        position: relative;
+        transform-origin: center center;
       }
       .agent-node:hover {
-        transform: scale(1.05);
-        box-shadow: 0 0 20px rgba(157, 26, 16, 0.3);
-        border-color: #9d1a10;
-      }
-      .agent-node.active {
-        border-color: #9d1a10;
-        box-shadow: 0 0 30px rgba(157, 26, 16, 0.6);
-        background: rgba(157, 26, 16, 0.1);
-      }
-      .agent-node.active .iconify {
-        color: #9d1a10;
-        animation: pulse 2s infinite;
+        transform: translate(-50%, -50%) scale(1.08);
       }
 
-      @keyframes pulse {
+      /* Colores específicos por agente - Estados Activos */
+      #node-manager.active {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 40px rgba(59, 130, 246, 0.6),
+          0 0 80px rgba(59, 130, 246, 0.3) !important;
+        background: linear-gradient(
+          135deg,
+          rgba(59, 130, 246, 0.15),
+          rgba(59, 130, 246, 0.05)
+        ) !important;
+        transform: translate(-50%, -50%) scale(1.1) !important;
+      }
+      #node-investigator.active {
+        border-color: #ef4444 !important;
+        box-shadow: 0 0 40px rgba(239, 68, 68, 0.6),
+          0 0 80px rgba(239, 68, 68, 0.3) !important;
+        background: linear-gradient(
+          135deg,
+          rgba(239, 68, 68, 0.15),
+          rgba(239, 68, 68, 0.05)
+        ) !important;
+        transform: translate(-50%, -50%) scale(1.1) !important;
+      }
+      #node-analyst.active {
+        border-color: #10b981 !important;
+        box-shadow: 0 0 40px rgba(16, 185, 129, 0.6),
+          0 0 80px rgba(16, 185, 129, 0.3) !important;
+        background: linear-gradient(
+          135deg,
+          rgba(16, 185, 129, 0.15),
+          rgba(16, 185, 129, 0.05)
+        ) !important;
+        transform: translate(-50%, -50%) scale(1.1) !important;
+      }
+      #node-writer.active {
+        border-color: #f97316 !important;
+        box-shadow: 0 0 40px rgba(249, 115, 22, 0.6),
+          0 0 80px rgba(249, 115, 22, 0.3) !important;
+        background: linear-gradient(
+          135deg,
+          rgba(249, 115, 22, 0.15),
+          rgba(249, 115, 22, 0.05)
+        ) !important;
+        transform: translate(-50%, -50%) scale(1.1) !important;
+      }
+
+      .agent-node.active .iconify {
+        animation: iconPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        transform: scale(1.1);
+      }
+
+      .agent-node.active .status-indicator {
+        opacity: 1 !important;
+        animation: statusPulse 1.5s ease-in-out infinite;
+      }
+
+      @keyframes iconPulse {
         0%,
         100% {
           opacity: 1;
-          transform: scale(1);
+          transform: scale(1.1);
         }
         50% {
           opacity: 0.7;
-          transform: scale(1.1);
+          transform: scale(1.25);
+        }
+      }
+
+      @keyframes statusPulse {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+        50% {
+          transform: scale(1.3);
+          opacity: 0.6;
         }
       }
 
       /* Connection Lines */
       .connection-line {
-        stroke: #333;
-        stroke-width: 1;
+        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        stroke: #666666; /* Gris más claro y visible */
+        stroke-width: 0.3; /* Grosor visible en viewBox 100x100 */
+        opacity: 0.8; /* Más visible */
         fill: none;
-        transition: all 0.5s;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        filter: url(#glow);
       }
+
+      /* Refuerzo de visibilidad específico para Analyst → Writer */
+      #line-analyst-writer {
+        stroke: #dcdcdc;
+        stroke-width: 0.9;
+        opacity: 1;
+        filter: url(#glow) drop-shadow(0 0 3px rgba(255, 255, 255, 0.35));
+      }
+
+      /* Animación de flujo direccional (A -> B) */
       .connection-line.active {
-        stroke: #9d1a10;
-        stroke-width: 2;
-        filter: drop-shadow(0 0 5px #9d1a10);
-        stroke-dasharray: 10;
-        animation: flow 1s linear infinite;
+        stroke: #ffd700 !important;
+        stroke-width: 0.4 !important;
+        opacity: 1 !important;
+        filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.8)) !important;
+        stroke-dasharray: 4 2 !important;
+        animation: flowDirection 1.5s linear infinite;
       }
-      @keyframes flow {
+
+      /* Estado completado - línea coloreada permanente */
+      .connection-line.completed {
+        stroke: #10b981 !important;
+        stroke-width: 0.35 !important;
+        opacity: 1 !important;
+        filter: drop-shadow(0 0 2px rgba(16, 185, 129, 0.6)) !important;
+        stroke-dasharray: none !important;
+      }
+
+      /* Estado fallido - línea opaca */
+      .connection-line.failed {
+        stroke: rgba(212, 175, 55, 0.4) !important;
+        stroke-width: 0.25 !important;
+        opacity: 0.5 !important;
+        filter: none !important;
+        stroke-dasharray: none !important;
+      }
+
+      @keyframes flowDirection {
         to {
-          stroke-dashoffset: -20;
+          stroke-dashoffset: -6;
         }
       }
 
       /* Terminal Logs */
       .log-entry {
-        border-left: 2px solid #333;
-        padding-left: 1rem;
+        border-left: 3px solid #333;
+        padding: 8px 12px;
         margin-bottom: 0.5rem;
         opacity: 0;
         animation: slideIn 0.3s forwards;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.02);
+        backdrop-filter: blur(10px);
+        transition: all 0.2s ease;
+        cursor: pointer;
+        user-select: none;
+      }
+      .log-entry:hover {
+        background: rgba(255, 255, 255, 0.05);
+        transform: translateX(4px);
+      }
+      .log-entry.expandable::after {
+        content: "▼";
+        float: right;
+        font-size: 10px;
+        opacity: 0.5;
+        transition: transform 0.2s ease;
+      }
+      .log-entry.expandable.expanded::after {
+        transform: rotate(180deg);
+      }
+      .log-details {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        margin-top: 8px;
+        padding: 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 11px;
+        line-height: 1.6;
+        color: #a0a0a0;
+      }
+      .log-details.expanded {
+        max-height: 500px;
+        padding-top: 8px;
+        overflow-y: auto;
+      }
+      .log-details pre {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 8px;
+        border-radius: 4px;
+        overflow-x: auto;
+        margin: 4px 0;
       }
       .log-entry.info {
         border-color: #3b82f6;
+        background: rgba(59, 130, 246, 0.05);
       }
       .log-entry.success {
         border-color: #10b981;
+        background: rgba(16, 185, 129, 0.05);
       }
       .log-entry.warning {
         border-color: #f59e0b;
+        background: rgba(245, 158, 11, 0.05);
       }
       .log-entry.error {
         border-color: #ef4444;
+        background: rgba(239, 68, 68, 0.05);
       }
 
       @keyframes slideIn {
@@ -159,7 +298,7 @@
     >
       <a
         href="#"
-        class="text-2xl tracking-tighter font-semibold uppercase display-font"
+        class="text-3xl tracking-tighter font-semibold uppercase display-font"
       >
         MULTIAGENT<span class="text-[#9D1A10]">.</span>AI
       </a>
@@ -196,9 +335,9 @@
       <div class="absolute inset-0 z-0">
         <!-- Abstract Tech Background -->
         <img
-          src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=2070&auto=format&fit=crop"
-          alt="AI Network"
-          class="w-full h-full object-cover opacity-20 scale-105 animate-[pulse_10s_ease-in-out_infinite]"
+          src="{{ url_for('static', filename='imagen_background.png') }}"
+          alt="AI Robots Meeting"
+          class="w-full h-full object-cover opacity-30 scale-105 animate-[pulse_10s_ease-in-out_infinite]"
         />
         <div
           class="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/60 to-transparent"
@@ -232,6 +371,52 @@
               and generate high-value intelligence reports in real-time.
             </p>
           </div>
+
+          <div
+            class="mt-6 md:ml-auto md:w-1/3 reveal-text delay-400 backdrop-blur-sm bg-white/5 p-6 border-l-2 border-[#9D1A10]"
+          >
+            <p class="text-xs uppercase tracking-[0.3em] text-[#9D1A10] mb-3">
+              Task Force
+            </p>
+            <ul
+              class="space-y-2 text-sm md:text-base text-neutral-200 font-medium"
+            >
+              <li class="flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#9D1A10]"></span>
+                Manager — Mission Orchestrator
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#9D1A10]"></span>
+                Investigator — Field Research Lead
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#9D1A10]"></span>
+                Analyst — Bias & Fact Checker
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#9D1A10]"></span>
+                Writer — Senior Narrative Architect
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="absolute bottom-28 left-6 md:left-12 z-20 reveal-text delay-300"
+      >
+        <span
+          class="text-[#9D1A10] text-xs uppercase tracking-widest font-semibold block mb-2"
+        >
+          MEMBERS
+        </span>
+        <div
+          class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2 text-neutral-300 text-sm font-light tracking-wide uppercase"
+        >
+          <span>Alfonte Tarqui Rendo</span>
+          <span>Cuyo Zamata Yimmy Yeyson</span>
+          <span>Mamani Zapana Edward</span>
+          <span>Turpo Quispe Patty Milagros</span>
         </div>
       </div>
 
@@ -302,122 +487,250 @@
       <!-- Canvas Area -->
       <div
         class="relative w-full md:w-2/3 h-[80vh] md:h-auto bg-[#080808] overflow-hidden"
+        style="
+          background-image: radial-gradient(
+              circle at 50% 50%,
+              rgba(157, 26, 16, 0.05) 0%,
+              transparent 50%
+            ),
+            repeating-linear-gradient(
+              0deg,
+              rgba(255, 255, 255, 0.02) 0px,
+              transparent 1px,
+              transparent 40px
+            ),
+            repeating-linear-gradient(
+              90deg,
+              rgba(255, 255, 255, 0.02) 0px,
+              transparent 1px,
+              transparent 40px
+            );
+        "
       >
         <div class="absolute top-6 left-6 z-10">
-          <span class="text-[#9D1A10] text-xs uppercase tracking-widest"
-            >Live Operations Map</span
+          <span
+            class="text-[#9D1A10] text-xs uppercase tracking-widest font-semibold"
+            >⚡ Live Operations Map</span
           >
         </div>
 
         <!-- SVG Connections -->
-        <svg class="absolute inset-0 w-full h-full pointer-events-none z-0">
-          <!-- Manager -> Investigator -->
-          <line
+        <svg
+          class="absolute inset-0 w-full h-full pointer-events-none z-0"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+        >
+          <defs>
+            <!-- Filtro de blur para las líneas -->
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="0.5" result="coloredBlur" />
+              <feMerge>
+                <feMergeNode in="coloredBlur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+
+          <!-- 1. Manager → Investigator - Delegación inicial -->
+          <path
             id="line-manager-investigator"
             class="connection-line"
-            x1="15%"
-            y1="50%"
-            x2="50%"
-            y2="20%"
+            d="M 15 50 L 30 50 L 30 20 L 50 20"
           />
-          <!-- Investigator -> Analyst -->
-          <line
+
+          <!-- 2. Investigator → Analyst - Entrega de hallazgos -->
+          <path
             id="line-investigator-analyst"
             class="connection-line"
-            x1="50%"
-            y1="25%"
-            x2="50%"
-            y2="45%"
+            d="M 50 20 L 50 50"
           />
-          <!-- Analyst -> Writer -->
-          <line
-            id="line-analyst-writer"
-            class="connection-line"
-            x1="50%"
-            y1="55%"
-            x2="50%"
-            y2="75%"
-          />
-          <!-- Backtracking: Analyst -> Investigator -->
+
+          <!-- 3. Analyst → Investigator - Backtracking si rechaza (punteada) -->
           <path
             id="path-backtracking"
             class="connection-line"
-            d="M 50% 50% Q 65% 35% 50% 20%"
-            fill="none"
-            stroke-dasharray="5,5"
+            d="M 50 50 L 70 50 L 70 20 L 50 20"
+            style="stroke-dasharray: 2, 1; opacity: 0.5"
+          />
+
+          <!-- 4. Analyst → Writer - Si aprueba, pasa al Writer -->
+          <path
+            id="line-analyst-writer"
+            class="connection-line"
+            d="M 50 50 L 50 80"
+            vector-effect="non-scaling-stroke"
+          />
+
+          <!-- 5. Writer → Manager - Retorno con artículo completado -->
+          <path
+            id="line-writer-manager"
+            class="connection-line"
+            d="M 50 80 L 30 80 L 30 50 L 15 50"
           />
         </svg>
 
         <!-- Nodes -->
-        <!-- Manager -->
+        <!-- Manager (Azul) -->
         <div
           id="node-manager"
-          class="agent-node absolute top-1/2 left-[15%] -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full bg-[#111] border border-white/10 flex flex-col items-center justify-center z-10 cursor-pointer group"
+          class="agent-node absolute top-1/2 left-[15%] -translate-x-1/2 -translate-y-1/2 w-28 h-28 md:w-32 md:h-32 lg:w-40 lg:h-40 rounded-2xl bg-gradient-to-br from-[#0a0a0a] to-[#111] border-2 border-blue-500/30 flex flex-col items-center justify-center z-10 cursor-pointer group shadow-lg shadow-blue-500/10 backdrop-blur-sm"
+          style="transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
         >
+          <!-- Puertos de Conexión -->
+          <div
+            class="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-blue-400/50 border border-blue-300"
+          ></div>
+          <div
+            class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-blue-400/50 border border-blue-300"
+          ></div>
+          <div
+            class="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-blue-400/50 border border-blue-300"
+          ></div>
+          <div
+            class="absolute -right-1 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-blue-400/50 border border-blue-300"
+          ></div>
+
+          <!-- Indicador de Estado Pulsante -->
+          <div
+            class="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-blue-500 border-2 border-[#080808] opacity-0 transition-opacity status-indicator"
+            style="box-shadow: 0 0 10px rgba(59, 130, 246, 0.8)"
+          ></div>
+
           <span
-            class="iconify text-3xl text-neutral-500 group-hover:text-white transition-colors mb-2"
+            class="iconify text-4xl text-blue-400 mb-3 transition-all duration-300"
             data-icon="lucide:briefcase"
+            style="filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3))"
           ></span>
-          <span class="text-[10px] uppercase tracking-widest text-neutral-400"
+          <span
+            class="text-xs uppercase tracking-widest text-blue-300 font-semibold"
             >Manager</span
           >
           <span
-            class="agent-status text-[9px] text-[#9D1A10] mt-1 opacity-0 group-hover:opacity-100 transition-opacity"
-            >Standby</span
+            class="agent-status text-[10px] text-blue-400 mt-2 opacity-70 font-mono"
+            >STANDBY</span
           >
         </div>
 
-        <!-- Investigator -->
+        <!-- Investigator (Rojo) -->
         <div
           id="node-investigator"
-          class="agent-node absolute top-[20%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full bg-[#111] border border-white/10 flex flex-col items-center justify-center z-10 cursor-pointer group"
+          class="agent-node absolute top-[20%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 md:w-32 md:h-32 lg:w-40 lg:h-40 rounded-2xl bg-gradient-to-br from-[#0a0a0a] to-[#111] border-2 border-red-500/30 flex flex-col items-center justify-center z-10 cursor-pointer group shadow-lg shadow-red-500/10 backdrop-blur-sm"
+          style="transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
         >
+          <!-- Puertos de Conexión -->
+          <div
+            class="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-red-400/50 border border-red-300"
+          ></div>
+          <div
+            class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-red-400/50 border border-red-300"
+          ></div>
+          <div
+            class="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-red-400/50 border border-red-300"
+          ></div>
+          <div
+            class="absolute -right-1 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-red-400/50 border border-red-300"
+          ></div>
+
+          <!-- Indicador de Estado Pulsante -->
+          <div
+            class="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-red-500 border-2 border-[#080808] opacity-0 transition-opacity status-indicator"
+            style="box-shadow: 0 0 10px rgba(239, 68, 68, 0.8)"
+          ></div>
+
           <span
-            class="iconify text-3xl text-neutral-500 group-hover:text-white transition-colors mb-2"
+            class="iconify text-4xl text-red-400 mb-3 transition-all duration-300"
             data-icon="lucide:search"
+            style="filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.3))"
           ></span>
-          <span class="text-[10px] uppercase tracking-widest text-neutral-400"
+          <span
+            class="text-xs uppercase tracking-widest text-red-300 font-semibold"
             >Investigator</span
           >
           <span
-            class="agent-status text-[9px] text-[#9D1A10] mt-1 opacity-0 group-hover:opacity-100 transition-opacity"
-            >Standby</span
+            class="agent-status text-[10px] text-red-400 mt-2 opacity-70 font-mono"
+            >STANDBY</span
           >
         </div>
 
-        <!-- Analyst -->
+        <!-- Analyst (Verde) -->
         <div
           id="node-analyst"
-          class="agent-node absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full bg-[#111] border border-white/10 flex flex-col items-center justify-center z-10 cursor-pointer group"
+          class="agent-node absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 md:w-32 md:h-32 lg:w-40 lg:h-40 rounded-2xl bg-gradient-to-br from-[#0a0a0a] to-[#111] border-2 border-green-500/30 flex flex-col items-center justify-center z-10 cursor-pointer group shadow-lg shadow-green-500/10 backdrop-blur-sm"
+          style="transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
         >
+          <!-- Puertos de Conexión -->
+          <div
+            class="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-green-400/50 border border-green-300"
+          ></div>
+          <div
+            class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-green-400/50 border border-green-300"
+          ></div>
+          <div
+            class="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-green-400/50 border border-green-300"
+          ></div>
+          <div
+            class="absolute -right-1 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-green-400/50 border border-green-300"
+          ></div>
+
+          <!-- Indicador de Estado Pulsante -->
+          <div
+            class="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-green-500 border-2 border-[#080808] opacity-0 transition-opacity status-indicator"
+            style="box-shadow: 0 0 10px rgba(16, 185, 129, 0.8)"
+          ></div>
+
           <span
-            class="iconify text-3xl text-neutral-500 group-hover:text-white transition-colors mb-2"
+            class="iconify text-4xl text-green-400 mb-3 transition-all duration-300"
             data-icon="lucide:brain-circuit"
+            style="filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.3))"
           ></span>
-          <span class="text-[10px] uppercase tracking-widest text-neutral-400"
+          <span
+            class="text-xs uppercase tracking-widest text-green-300 font-semibold"
             >Analyst</span
           >
           <span
-            class="agent-status text-[9px] text-[#9D1A10] mt-1 opacity-0 group-hover:opacity-100 transition-opacity"
-            >Standby</span
+            class="agent-status text-[10px] text-green-400 mt-2 opacity-70 font-mono"
+            >STANDBY</span
           >
         </div>
 
-        <!-- Writer -->
+        <!-- Writer (Naranja) -->
         <div
           id="node-writer"
-          class="agent-node absolute top-[80%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full bg-[#111] border border-white/10 flex flex-col items-center justify-center z-10 cursor-pointer group"
+          class="agent-node absolute top-[80%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 md:w-32 md:h-32 lg:w-40 lg:h-40 rounded-2xl bg-gradient-to-br from-[#0a0a0a] to-[#111] border-2 border-orange-500/30 flex flex-col items-center justify-center z-10 cursor-pointer group shadow-lg shadow-orange-500/10 backdrop-blur-sm"
+          style="transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
         >
+          <!-- Puertos de Conexión -->
+          <div
+            class="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-orange-400/50 border border-orange-300"
+          ></div>
+          <div
+            class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-orange-400/50 border border-orange-300"
+          ></div>
+          <div
+            class="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-orange-400/50 border border-orange-300"
+          ></div>
+          <div
+            class="absolute -right-1 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-orange-400/50 border border-orange-300"
+          ></div>
+
+          <!-- Indicador de Estado Pulsante -->
+          <div
+            class="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-orange-500 border-2 border-[#080808] opacity-0 transition-opacity status-indicator"
+            style="box-shadow: 0 0 10px rgba(249, 115, 22, 0.8)"
+          ></div>
+
           <span
-            class="iconify text-3xl text-neutral-500 group-hover:text-white transition-colors mb-2"
+            class="iconify text-4xl text-orange-400 mb-3 transition-all duration-300"
             data-icon="lucide:pen-tool"
+            style="filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.3))"
           ></span>
-          <span class="text-[10px] uppercase tracking-widest text-neutral-400"
+          <span
+            class="text-xs uppercase tracking-widest text-orange-300 font-semibold"
             >Writer</span
           >
           <span
-            class="agent-status text-[9px] text-[#9D1A10] mt-1 opacity-0 group-hover:opacity-100 transition-opacity"
-            >Standby</span
+            class="agent-status text-[10px] text-orange-400 mt-2 opacity-70 font-mono"
+            >STANDBY</span
           >
         </div>
       </div>
@@ -427,24 +740,50 @@
         class="w-full md:w-1/3 h-[50vh] md:h-auto bg-[#0a0a0a] border-l border-white/5 flex flex-col"
       >
         <div
-          class="p-6 border-b border-white/5 flex justify-between items-center"
+          class="p-6 border-b border-white/5 flex justify-between items-center bg-gradient-to-r from-[#0a0a0a] to-[#0d0d0d]"
         >
-          <span class="text-white uppercase tracking-widest text-xs"
-            >System Logs</span
-          >
+          <div class="flex items-center gap-3">
+            <span
+              class="iconify text-emerald-400"
+              data-icon="lucide:terminal"
+            ></span>
+            <span
+              class="text-white uppercase tracking-widest text-xs font-semibold"
+              >System Logs</span
+            >
+          </div>
           <div class="flex gap-2">
-            <div class="w-2 h-2 rounded-full bg-red-500"></div>
-            <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
-            <div class="w-2 h-2 rounded-full bg-green-500"></div>
+            <div
+              class="w-2.5 h-2.5 rounded-full bg-red-500 shadow-lg shadow-red-500/50"
+            ></div>
+            <div
+              class="w-2.5 h-2.5 rounded-full bg-yellow-500 shadow-lg shadow-yellow-500/50"
+            ></div>
+            <div
+              class="w-2.5 h-2.5 rounded-full bg-green-500 shadow-lg shadow-green-500/50 animate-pulse"
+            ></div>
           </div>
         </div>
         <div
           id="logsContainer"
           class="flex-1 p-6 overflow-y-auto font-mono text-xs text-neutral-400 space-y-2"
+          style="
+            background: linear-gradient(to bottom, #0a0a0a 0%, #080808 100%);
+          "
         >
-          <div class="log-entry info">
-            <span class="text-neutral-600">[SYSTEM]</span> Ready for
-            initialization...
+          <div
+            class="log-entry info"
+            style="
+              border-left: 3px solid #3b82f6;
+              padding-left: 12px;
+              background: rgba(59, 130, 246, 0.05);
+              padding: 8px 12px;
+              border-radius: 4px;
+            "
+          >
+            <span class="text-blue-400 font-bold">[SYSTEM]</span>
+            <span class="text-neutral-300">Ready for initialization...</span>
+            <span class="text-neutral-600 text-[10px] ml-2">⏱ Ready</span>
           </div>
         </div>
       </div>
@@ -626,7 +965,10 @@
 
       function handleAgentStart(data) {
         const agentKey = getAgentKey(data.agent);
-        addLog("info", data.agent.toUpperCase(), "Activated");
+        const details = `Agent: ${data.agent}\nTask: ${
+          data.task || "Processing assigned objective"
+        }\nStatus: Initializing...`;
+        addLog("info", data.agent.toUpperCase(), "Activated", details);
 
         if (previousAgent && previousAgent !== agentKey) {
           activateConnection(previousAgent, agentKey);
@@ -638,7 +980,12 @@
       }
 
       function handleBacktracking(data) {
-        addLog("warning", "ANALYST", data.message);
+        const details = `Reason: ${
+          data.reason || "Quality check failed"
+        }\nFeedback: ${
+          data.feedback || "Requesting additional research"
+        }\nAction: Routing back to Investigator`;
+        addLog("warning", "ANALYST", data.message, details);
         activateConnection("analyst", "investigator");
         previousAgent = "analyst";
       }
@@ -692,30 +1039,52 @@
 
       function handleAgentFinish(data) {
         const agentKey = getAgentKey(data.agent);
-        addLog("success", data.agent.toUpperCase(), "Task Completed");
+        const details = `Agent: ${data.agent}\nStatus: Completed\nOutput: ${
+          data.output || "Task finished successfully"
+        }\nDuration: ${data.duration || "N/A"}`;
+        addLog("success", data.agent.toUpperCase(), "Task Completed", details);
         deactivateNode(agentKey);
         updateAgentStatus(agentKey, "COMPLETED");
+
+        // Visualizar retorno al Manager cuando el Writer termina
+        if (agentKey === "writer") {
+          activateConnection("writer", "manager");
+        }
       }
 
       function handleToolStart(data) {
         const agentKey = getAgentKey(data.agent);
+        const details = `Tool: ${data.tool_name || "External API"}\nAgent: ${
+          data.agent
+        }\nInput: ${data.input || "Processing..."}\nStatus: Executing tool...`;
         addLog(
           "warning",
           data.agent.toUpperCase(),
-          `Using Tool: ${data.tool_name || "External API"}`
+          `Using Tool: ${data.tool_name || "External API"}`,
+          details
         );
         // activateConnection(agentKey, "tool"); // Removed as no tool node exists
       }
 
       function handleToolEnd(data) {
         let message = `Tool Execution Finished`;
+        let details = `Tool: ${data.tool_name || "External API"}\n`;
 
         // Mostrar detalles si hay distribución de fuentes
         if (data.output && data.output.includes("Tier1")) {
           message += ` - ${data.output}`;
+          details += `Output Summary: ${data.output}\n`;
         }
 
-        addLog("success", data.agent.toUpperCase(), message);
+        if (data.output) {
+          details += `\nFull Output:\n${
+            typeof data.output === "string"
+              ? data.output
+              : JSON.stringify(data.output, null, 2)
+          }`;
+        }
+
+        addLog("success", data.agent.toUpperCase(), message, details);
 
         // Mostrar alerta si solo hay APIs globales
         if (data.alert) {
@@ -758,25 +1127,58 @@
       // =====================================================================
       // UI HELPERS
       // =====================================================================
-      function addLog(type, agent, message) {
+      function addLog(type, agent, message, details = null) {
         const container = document.getElementById("logsContainer");
         const entry = document.createElement("div");
         entry.className = `log-entry ${type}`;
+        if (details) entry.classList.add("expandable");
 
         const timestamp = new Date().toLocaleTimeString("en-US", {
           hour12: false,
         });
 
+        // Colores por tipo de log
+        const agentColors = {
+          info: "text-blue-400",
+          success: "text-green-400",
+          warning: "text-yellow-400",
+          error: "text-red-400",
+        };
+
+        const agentColor = agentColors[type] || "text-white";
+
         entry.innerHTML = `
-                <span class="text-neutral-600 font-mono text-[10px] mr-2">[${timestamp}]</span>
-                <span class="font-bold ${
-                  type === "error" ? "text-red-500" : "text-white"
-                }">${agent}</span>: 
-                <span class="text-neutral-400">${message}</span>
+                <div class="log-header">
+                  <span class="${agentColor} font-bold">[${agent}]</span> 
+                  <span class="text-neutral-300">${message}</span>
+                  <span class="text-neutral-600 text-[10px] ml-2">⏱ ${timestamp}</span>
+                </div>
             `;
+
+        if (details) {
+          const detailsDiv = document.createElement("div");
+          detailsDiv.className = "log-details";
+          detailsDiv.innerHTML = formatDetails(details);
+          entry.appendChild(detailsDiv);
+
+          entry.addEventListener("click", () => {
+            entry.classList.toggle("expanded");
+            detailsDiv.classList.toggle("expanded");
+          });
+        }
 
         container.appendChild(entry);
         container.scrollTop = container.scrollHeight;
+      }
+
+      function formatDetails(details) {
+        if (typeof details === "string") {
+          return `<pre>${details}</pre>`;
+        }
+        if (typeof details === "object") {
+          return `<pre>${JSON.stringify(details, null, 2)}</pre>`;
+        }
+        return details;
       }
 
       function clearLogs() {
@@ -809,10 +1211,12 @@
           node.classList.remove("active");
           const statusEl = node.querySelector(".agent-status");
           if (statusEl) {
-            statusEl.textContent = "Standby";
+            statusEl.textContent = "STANDBY";
             statusEl.classList.add("opacity-0");
           }
         });
+        // Resetear todas las conexiones
+        resetConnections();
       }
 
       function displayResult(article) {
@@ -1000,26 +1404,53 @@
         return agentMap[agentName] || "manager";
       }
 
-      function activateConnection(fromAgent, toAgent) {
+      function activateConnection(fromAgent, toAgent, success = true) {
         let connectionId = null;
 
+        // FLUJO PRINCIPAL
         if (fromAgent === "manager" && toAgent === "investigator") {
           connectionId = "line-manager-investigator";
         } else if (fromAgent === "investigator" && toAgent === "analyst") {
           connectionId = "line-investigator-analyst";
         } else if (fromAgent === "analyst" && toAgent === "writer") {
           connectionId = "line-analyst-writer";
-        } else if (fromAgent === "analyst" && toAgent === "investigator") {
+        }
+        // RETROALIMENTACIÓN (Backtracking)
+        else if (fromAgent === "analyst" && toAgent === "investigator") {
           connectionId = "path-backtracking";
+        }
+        // RETORNO (Writer finaliza y reporta a Manager)
+        else if (fromAgent === "writer" && toAgent === "manager") {
+          connectionId = "line-writer-manager";
         }
 
         if (connectionId) {
           const line = document.getElementById(connectionId);
           if (line) {
+            // Limpiar estados previos
+            line.classList.remove("active", "completed", "failed");
+
+            // Activar animación direccional
             line.classList.add("active");
-            setTimeout(() => line.classList.remove("active"), 3000);
+
+            // Después de la animación, establecer estado final
+            setTimeout(() => {
+              line.classList.remove("active");
+              if (success) {
+                line.classList.add("completed");
+              } else {
+                line.classList.add("failed");
+              }
+            }, 2000);
           }
         }
+      }
+
+      function resetConnections() {
+        const connections = document.querySelectorAll(".connection-line");
+        connections.forEach((line) => {
+          line.classList.remove("active", "completed", "failed");
+        });
       }
     </script>
   </body>
