@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MultiAgent AI | Autonomous Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600&family=Oswald:wght@300;400;500&display=swap");
+
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #0a0a0a;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #333;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #9d1a10;
+      }
+
+      /* Animations */
+      .reveal-text {
+        animation: revealUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      .delay-100 {
+        animation-delay: 0.1s;
+      }
+      .delay-200 {
+        animation-delay: 0.2s;
+      }
+      .delay-300 {
+        animation-delay: 0.3s;
+      }
+
+      @keyframes revealUp {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .glow-red {
+        background: radial-gradient(
+          circle at center,
+          rgba(157, 26, 16, 0.4) 0%,
+          rgba(157, 26, 16, 0) 70%
+        );
+      }
+
+      body {
+        font-family: "Manrope", sans-serif;
+      }
+      h1,
+      h2,
+      h3,
+      .display-font {
+        font-family: "Oswald", sans-serif;
+      }
+
+      /* Agent Node Styles */
+      .agent-node {
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+      }
+      .agent-node:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 20px rgba(157, 26, 16, 0.3);
+        border-color: #9d1a10;
+      }
+      .agent-node.active {
+        border-color: #9d1a10;
+        box-shadow: 0 0 30px rgba(157, 26, 16, 0.6);
+        background: rgba(157, 26, 16, 0.1);
+      }
+      .agent-node.active .iconify {
+        color: #9d1a10;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.7;
+          transform: scale(1.1);
+        }
+      }
+
+      /* Connection Lines */
+      .connection-line {
+        stroke: #333;
+        stroke-width: 1;
+        fill: none;
+        transition: all 0.5s;
+      }
+      .connection-line.active {
+        stroke: #9d1a10;
+        stroke-width: 2;
+        filter: drop-shadow(0 0 5px #9d1a10);
+        stroke-dasharray: 10;
+        animation: flow 1s linear infinite;
+      }
+      @keyframes flow {
+        to {
+          stroke-dashoffset: -20;
+        }
+      }
+
+      /* Terminal Logs */
+      .log-entry {
+        border-left: 2px solid #333;
+        padding-left: 1rem;
+        margin-bottom: 0.5rem;
+        opacity: 0;
+        animation: slideIn 0.3s forwards;
+      }
+      .log-entry.info {
+        border-color: #3b82f6;
+      }
+      .log-entry.success {
+        border-color: #10b981;
+      }
+      .log-entry.warning {
+        border-color: #f59e0b;
+      }
+      .log-entry.error {
+        border-color: #ef4444;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateX(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+    </style>
+  </head>
+  <body
+    class="bg-[#050505] text-neutral-300 antialiased selection:bg-[#9D1A10] selection:text-white overflow-x-hidden"
+  >
+    <!-- Navigation -->
+    <nav
+      class="fixed top-0 w-full z-50 px-6 py-6 flex justify-between items-center mix-blend-difference text-white"
+    >
+      <a
+        href="#"
+        class="text-2xl tracking-tighter font-semibold uppercase display-font"
+      >
+        MULTIAGENT<span class="text-[#9D1A10]">.</span>AI
+      </a>
+      <div
+        class="hidden md:flex gap-12 text-sm font-medium tracking-wide uppercase"
+      >
+        <a
+          href="#mission-control"
+          class="hover:text-neutral-400 transition-colors"
+          >Mission Control</a
+        >
+        <a href="#live-ops" class="hover:text-neutral-400 transition-colors"
+          >Live Ops</a
+        >
+        <a href="#intelligence" class="hover:text-neutral-400 transition-colors"
+          >Intelligence</a
+        >
+      </div>
+      <div class="flex items-center gap-4">
+        <div
+          id="connectionStatus"
+          class="w-2 h-2 rounded-full bg-red-500 animate-pulse"
+        ></div>
+        <span class="text-xs uppercase tracking-widest text-neutral-500"
+          >System Status</span
+        >
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header
+      class="relative w-full h-screen flex flex-col justify-center overflow-hidden"
+    >
+      <div class="absolute inset-0 z-0">
+        <!-- Abstract Tech Background -->
+        <img
+          src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=2070&auto=format&fit=crop"
+          alt="AI Network"
+          class="w-full h-full object-cover opacity-20 scale-105 animate-[pulse_10s_ease-in-out_infinite]"
+        />
+        <div
+          class="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/60 to-transparent"
+        ></div>
+        <div
+          class="absolute inset-0 bg-gradient-to-r from-[#050505] via-transparent to-[#9D1A10]/10 mix-blend-overlay"
+        ></div>
+      </div>
+
+      <div class="relative z-10 px-6 md:px-12 w-full max-w-7xl mx-auto pt-20">
+        <div class="flex flex-col items-start">
+          <p
+            class="text-[#9D1A10] uppercase tracking-[0.3em] text-xs font-semibold mb-4 reveal-text delay-100"
+          >
+            Autonomous Swarm Intelligence
+          </p>
+          <h1
+            class="text-6xl md:text-8xl lg:text-9xl font-normal uppercase tracking-tighter leading-[0.85] text-white mix-blend-lighten reveal-text delay-200"
+          >
+            Orchestrating<br />
+            <span class="ml-12 md:ml-24 text-neutral-500">Digital</span> Minds
+          </h1>
+
+          <div
+            class="mt-12 md:ml-auto md:w-1/3 reveal-text delay-300 backdrop-blur-sm bg-white/5 p-6 border-l-2 border-[#9D1A10]"
+          >
+            <p
+              class="text-sm md:text-base text-neutral-300 font-light leading-relaxed"
+            >
+              Deploy a coordinated team of AI agents to investigate, analyze,
+              and generate high-value intelligence reports in real-time.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="absolute bottom-10 left-6 md:left-12 z-20 flex items-center gap-4 reveal-text delay-300"
+      >
+        <div class="h-[1px] w-12 bg-neutral-600"></div>
+        <span class="uppercase text-xs tracking-widest text-neutral-500"
+          >Scroll to Initialize</span
+        >
+      </div>
+    </header>
+
+    <!-- Mission Control (Input) -->
+    <section
+      id="mission-control"
+      class="relative py-24 px-6 md:px-12 bg-[#0a0a0a] border-t border-white/5"
+    >
+      <div class="max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
+          <div class="md:col-span-5">
+            <h2
+              class="text-4xl md:text-5xl font-light tracking-tight text-white leading-[1.1] mb-6"
+            >
+              Initialize <span class="text-[#9D1A10]">Mission</span>
+            </h2>
+            <p class="text-neutral-400 font-light mb-8">
+              Define the objective for the agent swarm. The Manager will
+              allocate tasks to the Investigator, Analyst, and Writer.
+            </p>
+          </div>
+          <div class="md:col-span-7">
+            <div class="flex flex-col gap-4">
+              <div class="relative group">
+                <input
+                  type="text"
+                  id="topicInput"
+                  class="w-full bg-[#111] border border-white/10 p-6 text-xl text-white placeholder-neutral-600 focus:outline-none focus:border-[#9D1A10] transition-colors"
+                  placeholder="Enter research topic (e.g., 'Quantum Computing Breakthroughs')"
+                  onkeypress="if(event.key==='Enter') startGeneration()"
+                />
+                <div
+                  class="absolute bottom-0 left-0 h-[1px] w-0 bg-[#9D1A10] transition-all duration-500 group-hover:w-full"
+                ></div>
+              </div>
+              <button
+                id="generateBtn"
+                onclick="startGeneration()"
+                class="self-start group flex items-center gap-4 uppercase text-sm tracking-widest bg-white text-black px-8 py-4 hover:bg-[#9D1A10] hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Deploy Agents
+                <span
+                  class="iconify group-hover:translate-x-1 transition-transform"
+                  data-icon="lucide:arrow-right"
+                ></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Live Operations (Visualization) -->
+    <section
+      id="live-ops"
+      class="relative w-full min-h-screen bg-[#050505] border-t border-white/5 flex flex-col md:flex-row"
+    >
+      <!-- Canvas Area -->
+      <div
+        class="relative w-full md:w-2/3 h-[80vh] md:h-auto bg-[#080808] overflow-hidden"
+      >
+        <div class="absolute top-6 left-6 z-10">
+          <span class="text-[#9D1A10] text-xs uppercase tracking-widest"
+            >Live Operations Map</span
+          >
+        </div>
+
+        <!-- SVG Connections -->
+        <svg class="absolute inset-0 w-full h-full pointer-events-none z-0">
+          <!-- Manager -> Investigator -->
+          <line
+            id="line-manager-investigator"
+            class="connection-line"
+            x1="15%"
+            y1="50%"
+            x2="50%"
+            y2="20%"
+          />
+          <!-- Investigator -> Analyst -->
+          <line
+            id="line-investigator-analyst"
+            class="connection-line"
+            x1="50%"
+            y1="25%"
+            x2="50%"
+            y2="45%"
+          />
+          <!-- Analyst -> Writer -->
+          <line
+            id="line-analyst-writer"
+            class="connection-line"
+            x1="50%"
+            y1="55%"
+            x2="50%"
+            y2="75%"
+          />
+          <!-- Backtracking: Analyst -> Investigator -->
+          <path
+            id="path-backtracking"
+            class="connection-line"
+            d="M 50% 50% Q 65% 35% 50% 20%"
+            fill="none"
+            stroke-dasharray="5,5"
+          />
+        </svg>
+
+        <!-- Nodes -->
+        <!-- Manager -->
+        <div
+          id="node-manager"
+          class="agent-node absolute top-1/2 left-[15%] -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full bg-[#111] border border-white/10 flex flex-col items-center justify-center z-10 cursor-pointer group"
+        >
+          <span
+            class="iconify text-3xl text-neutral-500 group-hover:text-white transition-colors mb-2"
+            data-icon="lucide:briefcase"
+          ></span>
+          <span class="text-[10px] uppercase tracking-widest text-neutral-400"
+            >Manager</span
+          >
+          <span
+            class="agent-status text-[9px] text-[#9D1A10] mt-1 opacity-0 group-hover:opacity-100 transition-opacity"
+            >Standby</span
+          >
+        </div>
+
+        <!-- Investigator -->
+        <div
+          id="node-investigator"
+          class="agent-node absolute top-[20%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full bg-[#111] border border-white/10 flex flex-col items-center justify-center z-10 cursor-pointer group"
+        >
+          <span
+            class="iconify text-3xl text-neutral-500 group-hover:text-white transition-colors mb-2"
+            data-icon="lucide:search"
+          ></span>
+          <span class="text-[10px] uppercase tracking-widest text-neutral-400"
+            >Investigator</span
+          >
+          <span
+            class="agent-status text-[9px] text-[#9D1A10] mt-1 opacity-0 group-hover:opacity-100 transition-opacity"
+            >Standby</span
+          >
+        </div>
+
+        <!-- Analyst -->
+        <div
+          id="node-analyst"
+          class="agent-node absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full bg-[#111] border border-white/10 flex flex-col items-center justify-center z-10 cursor-pointer group"
+        >
+          <span
+            class="iconify text-3xl text-neutral-500 group-hover:text-white transition-colors mb-2"
+            data-icon="lucide:brain-circuit"
+          ></span>
+          <span class="text-[10px] uppercase tracking-widest text-neutral-400"
+            >Analyst</span
+          >
+          <span
+            class="agent-status text-[9px] text-[#9D1A10] mt-1 opacity-0 group-hover:opacity-100 transition-opacity"
+            >Standby</span
+          >
+        </div>
+
+        <!-- Writer -->
+        <div
+          id="node-writer"
+          class="agent-node absolute top-[80%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full bg-[#111] border border-white/10 flex flex-col items-center justify-center z-10 cursor-pointer group"
+        >
+          <span
+            class="iconify text-3xl text-neutral-500 group-hover:text-white transition-colors mb-2"
+            data-icon="lucide:pen-tool"
+          ></span>
+          <span class="text-[10px] uppercase tracking-widest text-neutral-400"
+            >Writer</span
+          >
+          <span
+            class="agent-status text-[9px] text-[#9D1A10] mt-1 opacity-0 group-hover:opacity-100 transition-opacity"
+            >Standby</span
+          >
+        </div>
+      </div>
+
+      <!-- Terminal / Logs -->
+      <div
+        class="w-full md:w-1/3 h-[50vh] md:h-auto bg-[#0a0a0a] border-l border-white/5 flex flex-col"
+      >
+        <div
+          class="p-6 border-b border-white/5 flex justify-between items-center"
+        >
+          <span class="text-white uppercase tracking-widest text-xs"
+            >System Logs</span
+          >
+          <div class="flex gap-2">
+            <div class="w-2 h-2 rounded-full bg-red-500"></div>
+            <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
+            <div class="w-2 h-2 rounded-full bg-green-500"></div>
+          </div>
+        </div>
+        <div
+          id="logsContainer"
+          class="flex-1 p-6 overflow-y-auto font-mono text-xs text-neutral-400 space-y-2"
+        >
+          <div class="log-entry info">
+            <span class="text-neutral-600">[SYSTEM]</span> Ready for
+            initialization...
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Intelligence Report (Results) -->
+    <section
+      id="intelligence"
+      class="py-32 bg-white text-black relative hidden"
+    >
+      <div
+        class="absolute top-0 right-0 w-1/2 h-full bg-neutral-100 -skew-x-12 translate-x-32 hidden md:block z-0"
+      ></div>
+
+      <div class="relative z-10 px-6 md:px-12 max-w-5xl mx-auto">
+        <div class="mb-12">
+          <span
+            class="text-[#9D1A10] uppercase tracking-widest text-sm font-bold"
+            >Mission Complete</span
+          >
+          <h2
+            class="text-5xl md:text-7xl font-normal uppercase tracking-tighter mt-4 text-neutral-900"
+          >
+            Intelligence <br /><span class="italic font-serif text-[#9D1A10]"
+              >Report</span
+            >
+          </h2>
+        </div>
+
+        <div
+          id="resultArticle"
+          class="prose prose-lg max-w-none prose-headings:font-oswald prose-headings:uppercase prose-p:font-manrope prose-p:font-light prose-a:text-[#9D1A10]"
+        >
+          <!-- Content will be injected here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer
+      class="bg-[#050505] py-12 px-6 md:px-12 border-t border-white/5 relative"
+    >
+      <div class="max-w-7xl mx-auto flex justify-between items-end">
+        <div>
+          <p class="text-neutral-600 text-xs uppercase tracking-widest">
+            © 2026 MultiAgent AI
+          </p>
+        </div>
+        <div class="text-right">
+          <div class="text-4xl font-bold text-white/10 display-font">MA.AI</div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Logic -->
+    <script>
+      // =====================================================================
+      // GLOBAL VARIABLES
+      // =====================================================================
+      let socket = null;
+      let currentSessionId = null;
+      let isGenerating = false;
+      let previousAgent = "manager";
+
+      const agentMap = {
+        "Investigador de Noticias": "investigator",
+        "Analista de Sesgos y Fact-Checker": "analyst",
+        "Redactor Senior": "writer",
+        "Jefe de Redacción": "manager",
+      };
+
+      // =====================================================================
+      // INITIALIZATION
+      // =====================================================================
+      document.addEventListener("DOMContentLoaded", () => {
+        initializeSocketIO();
+      });
+
+      // =====================================================================
+      // SOCKET.IO
+      // =====================================================================
+      function initializeSocketIO() {
+        socket = io("http://localhost:8080/agents", {
+          transports: ["websocket", "polling"],
+        });
+
+        socket.on("connect", () => {
+          addLog("success", "SYSTEM", "Connected to Neural Core");
+          const status = document.getElementById("connectionStatus");
+          status.classList.remove("bg-red-500");
+          status.classList.add("bg-green-500");
+        });
+
+        socket.on("disconnect", () => {
+          addLog("error", "SYSTEM", "Connection Lost");
+          const status = document.getElementById("connectionStatus");
+          status.classList.remove("bg-green-500");
+          status.classList.add("bg-red-500");
+        });
+
+        // Crew Events
+        socket.on("crew_start", handleCrewStart);
+        socket.on("agent_start", handleAgentStart);
+        socket.on("agent_thinking", handleAgentThinking);
+        socket.on("agent_finish", handleAgentFinish);
+        socket.on("tool_start", handleToolStart);
+        socket.on("tool_end", handleToolEnd);
+        socket.on("crew_finish", handleCrewFinish);
+        socket.on("error", handleError);
+        socket.on("generation_complete", handleGenerationComplete);
+        socket.on("backtracking", handleBacktracking);
+      }
+
+      // =====================================================================
+      // GENERATION LOGIC
+      // =====================================================================
+      async function startGeneration() {
+        const topic = document.getElementById("topicInput").value.trim();
+
+        if (!topic) {
+          alert("Please enter a mission topic.");
+          return;
+        }
+
+        if (isGenerating) {
+          alert("Mission already in progress.");
+          return;
+        }
+
+        // Reset UI
+        clearLogs();
+        document.getElementById("intelligence").classList.add("hidden");
+        resetAgentNodes();
+
+        // Scroll to Live Ops
+        document
+          .getElementById("live-ops")
+          .scrollIntoView({ behavior: "smooth" });
+
+        isGenerating = true;
+        const btn = document.getElementById("generateBtn");
+        btn.disabled = true;
+        btn.innerHTML = `Deploying... <span class="iconify animate-spin" data-icon="lucide:loader-2"></span>`;
+
+        addLog("info", "SYSTEM", `Initializing Mission: "${topic}"`);
+
+        try {
+          const response = await fetch("http://localhost:8080/api/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ topic }),
+          });
+
+          const data = await response.json();
+
+          if (data.status === "started") {
+            currentSessionId = data.session_id;
+            socket.emit("join_session", { session_id: currentSessionId });
+            addLog("success", "SYSTEM", `Session ID: ${currentSessionId}`);
+          } else {
+            throw new Error(data.message || "Initialization failed");
+          }
+        } catch (error) {
+          addLog("error", "SYSTEM", `Error: ${error.message}`);
+          isGenerating = false;
+          btn.disabled = false;
+          btn.innerHTML = `Deploy Agents <span class="iconify group-hover:translate-x-1 transition-transform" data-icon="lucide:arrow-right"></span>`;
+        }
+      }
+
+      // =====================================================================
+      // EVENT HANDLERS
+      // =====================================================================
+      function handleCrewStart(data) {
+        addLog("info", "CREW", data.message);
+        activateNode("manager");
+        previousAgent = "manager";
+      }
+
+      function handleAgentStart(data) {
+        const agentKey = getAgentKey(data.agent);
+        addLog("info", data.agent.toUpperCase(), "Activated");
+
+        if (previousAgent && previousAgent !== agentKey) {
+          activateConnection(previousAgent, agentKey);
+        }
+
+        activateNode(agentKey);
+        updateAgentStatus(agentKey, "ACTIVE");
+        previousAgent = agentKey;
+      }
+
+      function handleBacktracking(data) {
+        addLog("warning", "ANALYST", data.message);
+        activateConnection("analyst", "investigator");
+        previousAgent = "analyst";
+      }
+
+      function handleAgentThinking(data) {
+        const agentKey = getAgentKey(data.agent);
+        addLog("info", data.agent.toUpperCase(), `Thinking...`);
+      }
+
+      function showTimeoutWarning(message) {
+        // Crear banner de advertencia si no existe
+        let banner = document.getElementById("timeout-warning-banner");
+        if (!banner) {
+          banner = document.createElement("div");
+          banner.id = "timeout-warning-banner";
+          banner.style.cssText = `
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 9999;
+            max-width: 600px;
+            text-align: center;
+            font-weight: 600;
+            animation: slideDown 0.3s ease-out;
+          `;
+          document.body.appendChild(banner);
+        }
+
+        banner.innerHTML = `
+          <div style="font-size: 14px; margin-bottom: 5px;">⚠️ PROBLEMA DE TIMEOUT DETECTADO</div>
+          <div style="font-size: 12px; opacity: 0.9;">${message}</div>
+          <div style="font-size: 11px; margin-top: 8px; opacity: 0.8;">
+            Solo se recibieron APIs globales (snippets). Los scrapers locales (artículos completos) no respondieron a tiempo.
+          </div>
+        `;
+
+        // Auto-ocultar después de 10 segundos
+        setTimeout(() => {
+          if (banner) {
+            banner.style.animation = "slideUp 0.3s ease-out";
+            setTimeout(() => banner.remove(), 300);
+          }
+        }, 10000);
+      }
+
+      function handleAgentFinish(data) {
+        const agentKey = getAgentKey(data.agent);
+        addLog("success", data.agent.toUpperCase(), "Task Completed");
+        deactivateNode(agentKey);
+        updateAgentStatus(agentKey, "COMPLETED");
+      }
+
+      function handleToolStart(data) {
+        const agentKey = getAgentKey(data.agent);
+        addLog(
+          "warning",
+          data.agent.toUpperCase(),
+          `Using Tool: ${data.tool_name || "External API"}`
+        );
+        // activateConnection(agentKey, "tool"); // Removed as no tool node exists
+      }
+
+      function handleToolEnd(data) {
+        let message = `Tool Execution Finished`;
+
+        // Mostrar detalles si hay distribución de fuentes
+        if (data.output && data.output.includes("Tier1")) {
+          message += ` - ${data.output}`;
+        }
+
+        addLog("success", data.agent.toUpperCase(), message);
+
+        // Mostrar alerta si solo hay APIs globales
+        if (data.alert) {
+          addLog("error", "⚠️ TIMEOUT ISSUE", data.alert);
+          // Mostrar banner de advertencia
+          showTimeoutWarning(data.alert);
+        }
+      }
+
+      function handleCrewFinish(data) {
+        addLog("success", "CREW", "Mission Accomplished");
+        resetAgentNodes();
+      }
+
+      function handleGenerationComplete(data) {
+        if (data.status === "success") {
+          displayResult(data.article);
+          addLog("success", "SYSTEM", "Report Generated");
+
+          // Scroll to results
+          setTimeout(() => {
+            document
+              .getElementById("intelligence")
+              .scrollIntoView({ behavior: "smooth" });
+          }, 1000);
+        } else {
+          addLog("error", "SYSTEM", `Error: ${data.error}`);
+        }
+
+        isGenerating = false;
+        const btn = document.getElementById("generateBtn");
+        btn.disabled = false;
+        btn.innerHTML = `Deploy Agents <span class="iconify group-hover:translate-x-1 transition-transform" data-icon="lucide:arrow-right"></span>`;
+      }
+
+      function handleError(data) {
+        addLog("error", data.agent || "SYSTEM", data.error);
+      }
+
+      // =====================================================================
+      // UI HELPERS
+      // =====================================================================
+      function addLog(type, agent, message) {
+        const container = document.getElementById("logsContainer");
+        const entry = document.createElement("div");
+        entry.className = `log-entry ${type}`;
+
+        const timestamp = new Date().toLocaleTimeString("en-US", {
+          hour12: false,
+        });
+
+        entry.innerHTML = `
+                <span class="text-neutral-600 font-mono text-[10px] mr-2">[${timestamp}]</span>
+                <span class="font-bold ${
+                  type === "error" ? "text-red-500" : "text-white"
+                }">${agent}</span>: 
+                <span class="text-neutral-400">${message}</span>
+            `;
+
+        container.appendChild(entry);
+        container.scrollTop = container.scrollHeight;
+      }
+
+      function clearLogs() {
+        document.getElementById("logsContainer").innerHTML = "";
+      }
+
+      function activateNode(agentKey) {
+        const node = document.getElementById(`node-${agentKey}`);
+        if (node) node.classList.add("active");
+      }
+
+      function deactivateNode(agentKey) {
+        const node = document.getElementById(`node-${agentKey}`);
+        if (node) node.classList.remove("active");
+      }
+
+      function updateAgentStatus(agentKey, status) {
+        const node = document.getElementById(`node-${agentKey}`);
+        if (node) {
+          const statusEl = node.querySelector(".agent-status");
+          if (statusEl) {
+            statusEl.textContent = status;
+            statusEl.classList.remove("opacity-0");
+          }
+        }
+      }
+
+      function resetAgentNodes() {
+        document.querySelectorAll(".agent-node").forEach((node) => {
+          node.classList.remove("active");
+          const statusEl = node.querySelector(".agent-status");
+          if (statusEl) {
+            statusEl.textContent = "Standby";
+            statusEl.classList.add("opacity-0");
+          }
+        });
+      }
+
+      function displayResult(article) {
+        const panel = document.getElementById("intelligence");
+        const articleEl = document.getElementById("resultArticle");
+
+        // Parser de Markdown mejorado con estructura profesional
+        let html = article;
+
+        // 0. NORMALIZAR saltos de línea (corregir Markdown mal formateado)
+
+        // Asegurar espacio ANTES de los headers (si hay texto pegado antes)
+        html = html.replace(/([^\n])\s*(#{1,6}\s)/g, "$1\n\n$2");
+
+        // Asegurar espacio DESPUÉS de los headers (sin romper la última letra)
+        html = html.replace(/^(#{1,6}\s.+?)\s*$/gm, "$1\n\n");
+
+        // 1. Escapar HTML para seguridad
+        html = html
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+
+        // 2. Bloques de código con sintaxis (```lang)
+        html = html.replace(
+          /```(\w+)?\n([\s\S]+?)```/g,
+          '<pre class="bg-neutral-900 text-green-400 p-6 rounded-xl overflow-x-auto my-6 shadow-lg border border-neutral-700"><code class="font-mono text-sm leading-relaxed">$2</code></pre>'
+        );
+
+        // 3. Headers con estilos periodísticos
+        html = html.replace(
+          /^######\s+(.+)$/gm,
+          '<h6 class="text-sm font-semibold mt-6 mb-2 text-neutral-700 uppercase tracking-wide">$1</h6>'
+        );
+        html = html.replace(
+          /^#####\s+(.+)$/gm,
+          '<h5 class="text-base font-bold mt-6 mb-3 text-neutral-800">$1</h5>'
+        );
+        html = html.replace(
+          /^####\s+(.+)$/gm,
+          '<h4 class="text-lg font-bold mt-8 mb-3 text-neutral-800 border-l-4 border-[#9D1A10] pl-3">$1</h4>'
+        );
+        html = html.replace(
+          /^###\s+(.+)$/gm,
+          '<h3 class="text-xl md:text-2xl font-bold mt-10 mb-4 text-neutral-900">$1</h3>'
+        );
+        html = html.replace(
+          /^##\s+(.+)$/gm,
+          '<h2 class="text-2xl md:text-3xl font-bold mt-12 mb-6 text-neutral-900 border-b-2 border-[#9D1A10] pb-3">$1</h2>'
+        );
+        html = html.replace(
+          /^#\s+(.+)$/gm,
+          '<h1 class="text-4xl md:text-5xl lg:text-6xl font-black mb-6 text-[#9D1A10] leading-tight tracking-tight">$1</h1>'
+        );
+
+        // 4. Separadores con estilo
+        html = html.replace(
+          /^---$/gm,
+          '<hr class="my-10 border-t-2 border-neutral-200" />'
+        );
+        html = html.replace(
+          /^\*\*\*$/gm,
+          '<hr class="my-10 border-t-2 border-dashed border-neutral-300" />'
+        );
+
+        // 5. Blockquotes estilo periodístico
+        html = html.replace(
+          /^&gt;\s+(.+)$/gm,
+          '<blockquote class="border-l-4 border-[#9D1A10] bg-neutral-50 pl-6 pr-4 py-4 italic text-lg text-neutral-700 my-6 rounded-r-lg shadow-sm">$1</blockquote>'
+        );
+
+        // 6. Listas desordenadas con mejor espaciado
+        html = html.replace(
+          /^\*\s+(.+)$/gm,
+          '<li class="ml-6 list-disc mb-3 text-neutral-700 leading-relaxed">$1</li>'
+        );
+        html = html.replace(
+          /^-\s+(.+)$/gm,
+          '<li class="ml-6 list-disc mb-3 text-neutral-700 leading-relaxed">$1</li>'
+        );
+
+        // 7. Listas ordenadas
+        html = html.replace(
+          /^\d+\.\s+(.+)$/gm,
+          '<li class="ml-6 list-decimal mb-3 text-neutral-700 leading-relaxed">$1</li>'
+        );
+
+        // 8. Agrupar listas en containers
+        html = html.replace(
+          /(<li class="ml-6 list-disc[^>]*>.*?<\/li>(\n|$))+/gs,
+          '<ul class="my-6 space-y-1">$&</ul>'
+        );
+        html = html.replace(
+          /(<li class="ml-6 list-decimal[^>]*>.*?<\/li>(\n|$))+/gs,
+          '<ol class="my-6 space-y-1">$&</ol>'
+        );
+
+        // 9. Formato inline - bold, italic, combinados
+        html = html.replace(
+          /\*\*\*(.+?)\*\*\*/g,
+          '<strong class="font-black text-neutral-900"><em class="italic">$1</em></strong>'
+        );
+        html = html.replace(
+          /\*\*(.+?)\*\*/g,
+          '<strong class="font-bold text-neutral-900">$1</strong>'
+        );
+        html = html.replace(
+          /\*(.+?)\*/g,
+          '<em class="italic text-neutral-600">$1</em>'
+        );
+        html = html.replace(
+          /__(.+?)__/g,
+          '<strong class="font-bold text-neutral-900">$1</strong>'
+        );
+        html = html.replace(
+          /_(.+?)_/g,
+          '<em class="italic text-neutral-600">$1</em>'
+        );
+
+        // 10. Links con icono externo
+        html = html.replace(
+          /\[([^\]]+)\]\(([^)]+)\)/g,
+          '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-[#9D1A10] font-medium underline decoration-2 underline-offset-2 hover:text-red-700 hover:decoration-wavy transition-all duration-200">$1 <span class="text-xs">↗</span></a>'
+        );
+
+        // 11. Código inline
+        html = html.replace(
+          /`([^`]+)`/g,
+          '<code class="bg-red-50 text-[#9D1A10] px-2 py-0.5 rounded font-mono text-sm border border-red-100">$1</code>'
+        );
+
+        // 12. Párrafos bien formateados
+        html = html
+          .split("\n\n")
+          .map((block) => {
+            const trimmed = block.trim();
+
+            // No envolver si ya es elemento estructural
+            if (trimmed.match(/^<(h[1-6]|ul|ol|pre|blockquote|hr|div)/)) {
+              return trimmed;
+            }
+
+            // No envolver items de lista sueltos
+            if (trimmed.match(/^<li/)) {
+              return trimmed;
+            }
+
+            // Párrafos vacíos
+            if (!trimmed) {
+              return "";
+            }
+
+            // Párrafo normal con tipografía profesional
+            return `<p class="mb-6 text-lg leading-relaxed text-neutral-700 text-justify">${trimmed}</p>`;
+          })
+          .filter((block) => block) // Remover vacíos
+          .join("\n");
+
+        // 13. Detectar y estilizar el lead (primer párrafo en negrita)
+        html = html.replace(
+          /^<p class="mb-6[^>]*"><strong[^>]*>(.+?)<\/strong><\/p>/m,
+          '<p class="mb-8 text-xl md:text-2xl leading-relaxed text-neutral-800 font-semibold border-l-4 border-[#9D1A10] pl-4 bg-neutral-50 py-4 rounded-r">$1</p>'
+        );
+
+        // 14. Limpiar saltos de línea excesivos
+        html = html.replace(/\n{3,}/g, "\n\n");
+
+        // 15. Wrapper para article con clase profesional
+        const styledHtml = `
+          <article class="prose prose-lg max-w-none">
+            ${html}
+          </article>
+        `;
+
+        articleEl.innerHTML = styledHtml;
+        panel.classList.remove("hidden");
+
+        // Scroll suave al resultado
+        setTimeout(() => {
+          panel.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 300);
+      }
+
+      function getAgentKey(agentName) {
+        return agentMap[agentName] || "manager";
+      }
+
+      function activateConnection(fromAgent, toAgent) {
+        let connectionId = null;
+
+        if (fromAgent === "manager" && toAgent === "investigator") {
+          connectionId = "line-manager-investigator";
+        } else if (fromAgent === "investigator" && toAgent === "analyst") {
+          connectionId = "line-investigator-analyst";
+        } else if (fromAgent === "analyst" && toAgent === "writer") {
+          connectionId = "line-analyst-writer";
+        } else if (fromAgent === "analyst" && toAgent === "investigator") {
+          connectionId = "path-backtracking";
+        }
+
+        if (connectionId) {
+          const line = document.getElementById(connectionId);
+          if (line) {
+            line.classList.add("active");
+            setTimeout(() => line.classList.remove("active"), 3000);
+          }
+        }
+      }
+    </script>
+  </body>
+</html>

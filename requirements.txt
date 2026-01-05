@@ -1,0 +1,38 @@
+# =============================================================================
+# DEPENDENCIAS DEL SISTEMA MULTIAGENTE DE NOTICIAS
+# =============================================================================
+
+# Framework Web
+flask>=3.0.0
+flask-socketio>=5.3.0
+flask-cors>=4.0.0
+
+# CrewAI y Agentes (versiones compatibles)
+crewai>=0.28.8
+crewai-tools>=0.1.6
+
+# LangChain (versiones compatibles con CrewAI 0.28.8)
+langchain>=0.1.10,<0.2.0
+langchain-openai>=0.0.5
+langchain-community>=0.0.20
+
+# OpenAI SDK (versión exacta requerida por CrewAI)
+openai==1.83.0
+pydantic==2.11.9
+jiter>=0.6.1,<0.11
+
+# Utilidades
+python-dotenv>=1.0.0
+requests>=2.31.0
+pydantic>=2.5.0
+
+# Networking
+python-socketio>=5.11.0
+python-engineio>=4.8.0
+
+# Logging
+colorlog>=6.8.0
+
+# Opcional: Testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
